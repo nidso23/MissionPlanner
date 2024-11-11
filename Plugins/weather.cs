@@ -1,17 +1,25 @@
-﻿using MissionPlanner;
+﻿using GMap.NET.WindowsForms;
+using MissionPlanner;
 using MissionPlanner.Controls;
+using MissionPlanner.Maps;
+using MissionPlanner.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Forms;
+using MissionPlanner.GCSViews;
 
 namespace weather
 {
     public class Weather : MissionPlanner.Plugin.Plugin
     {
+        static ObservableCollection<PointLatLngAlt> WeatherPts = new ObservableCollection<PointLatLngAlt>();
+        private GMapOverlay weatheroverlay;
+
         public override string Name
         {
             get { return "Weather"; }
@@ -29,6 +37,10 @@ namespace weather
 
         public override bool Init()
         {
+            weatheroverlay = new GMapOverlay("Weather");
+            weatheroverlay.IsVisibile = true;
+            Host.FDGMapControl.Overlays.Add(weatheroverlay);
+
             return true;
         }
 
@@ -41,57 +53,68 @@ namespace weather
             var but = new ToolStripMenuItem("Wind");
             but.Click += async (s, e) =>
             {
-                (double lat, double lng, double alt) = GetLocation();
-
+                PointLatLngAlt point = GetLocation();
+                
                 try
                 {
-                    HttpResponseMessage response = await GetWeatherData(DateTime.Now, lat, lng, alt, "wind");
+                    HttpResponseMessage response = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "wind");
                     string jsonResponse = await response.Content.ReadAsStringAsync();
                     WeatherAPI weatherResponse = JsonConvert.DeserializeObject<WeatherAPI>(jsonResponse);
-                    MessageBox.Show(GetWindData(weatherResponse));
+                    MessageBox.Show(GetWindData(weatherResponse, point));
                 }
                 catch (Exception ex)
                 {
                     CustomMessageBox.Show(Strings.ERROR, ex.Message);
                 }
+                UpdateOverlay(weatheroverlay);
             };
             rootbut.DropDownItems.Add(but);
 
             but = new ToolStripMenuItem("Ocean Current");
             but.Click += async (s, e) => {
-                (double lat, double lng, double alt) = GetLocation();
-
+                PointLatLngAlt point = GetLocation();
+                
                 try
                 {
-                    HttpResponseMessage response = await GetWeatherData(DateTime.Now, lat, lng, alt, "current");
+                    HttpResponseMessage response = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "current");
                     string jsonResponse = await response.Content.ReadAsStringAsync();
                     WeatherAPI weatherResponse = JsonConvert.DeserializeObject<WeatherAPI>(jsonResponse);
-                    MessageBox.Show(GetCurrentData(weatherResponse));
+                    MessageBox.Show(GetCurrentData(weatherResponse, point));
                 }
                 catch (Exception ex)
                 {
                     CustomMessageBox.Show(Strings.ERROR, ex.Message);
                 }
+                UpdateOverlay(weatheroverlay);
             };
             rootbut.DropDownItems.Add(but);
 
             but = new ToolStripMenuItem("Ocean Waves");
             but.Click += async (s, e) => {
-                (double lat, double lng, double alt) = GetLocation();
+                PointLatLngAlt point = GetLocation();
 
                 try
                 {
-                    HttpResponseMessage response = await GetWeatherData(DateTime.Now, lat, lng, alt, "wave");
+                    HttpResponseMessage response = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "wave");
                     string jsonResponse = await response.Content.ReadAsStringAsync();
                     WeatherAPI weatherResponse = JsonConvert.DeserializeObject<WeatherAPI>(jsonResponse);
-                    MessageBox.Show(GetWaveData(weatherResponse));
+                    MessageBox.Show(GetWaveData(weatherResponse, point));
                 }
                 catch (Exception ex)
                 {
                     CustomMessageBox.Show(Strings.ERROR, ex.Message);
                 }
+                UpdateOverlay(weatheroverlay);
             };
             rootbut.DropDownItems.Add(but);
+
+            but = new ToolStripMenuItem("Delete");
+            but.Click += (s, e) => {
+                WeatherPtDelete((GMapMarkerWeather)FlightData.instance.CurrentGMapMarker);
+                UpdateOverlay(weatheroverlay);
+            };
+            rootbut.DropDownItems.Add(but);
+
             return true;
         }
 
@@ -100,7 +123,7 @@ namespace weather
         public async Task<HttpResponseMessage> GetWeatherData(DateTimeOffset dateTime, double latitude, double longitude, double altitude, string model)
             => await _client.GetAsync($"/weatherapi/1.0/weather?latitude={latitude}&longitude={longitude}&altitude={altitude}&time={CreateDate(dateTime)}&model={model}");
 
-        private string GetWindData(WeatherAPI data)
+        private string GetWindData(WeatherAPI data, PointLatLngAlt point)
         {
             if (data == null)
             {
@@ -140,10 +163,14 @@ namespace weather
             direction /= 4;
             latitude /= 4;
             longitude /= 4;
-            return $"latitude: {latitude} longitude: {longitude} altitdue: {altitude}\nspeed: {speed} direction: {direction}";
+
+            string info = $"Wind\nlatitude: {latitude} longitude: {longitude} altitdue: {altitude}\nspeed: {speed} direction: {direction}";
+            point.Tag = info;
+            WeatherPts.Add(point);
+            return info;
         }
 
-        private string GetCurrentData(WeatherAPI data)
+        private string GetCurrentData(WeatherAPI data, PointLatLngAlt point)
         {
             if (data == null)
             {
@@ -183,10 +210,14 @@ namespace weather
             direction /= 4;
             latitude /= 4;
             longitude /= 4;
-            return $"latitude: {latitude} longitude: {longitude} altitdue: {altitude * -1}\nspeed: {speed} direction: {direction}";
+
+            string info = $"Ocean Current\nlatitude: {latitude} longitude: {longitude} altitdue: {altitude * -1}\nspeed: {speed} direction: {direction}";
+            point.Tag = info;
+            WeatherPts.Add(point);
+            return info;
         }
 
-        private string GetWaveData(WeatherAPI data)
+        private string GetWaveData(WeatherAPI data, PointLatLngAlt point)
         {
             if (data == null)
             {
@@ -224,7 +255,11 @@ namespace weather
             direction /= 4;
             latitude /= 4;
             longitude /= 4;
-            return $"latitude: {latitude} longitude: {longitude}\nheight: {height} direction: {direction}";
+
+            string info = $"Waves\nlatitude: {latitude} longitude: {longitude}\nheight: {height} direction: {direction}";
+            point.Tag = info;
+            WeatherPts.Add(point);
+            return info;
         }
 
         private string CreateDate(DateTimeOffset dateTime)
@@ -252,7 +287,7 @@ namespace weather
             return timeString;
         }
 
-        private (double, double, double) GetLocation()
+        private PointLatLngAlt GetLocation()
         {
             double lat = Host.FDMenuMapPosition.Lat;
             double lng = Host.FDMenuMapPosition.Lng;
@@ -274,12 +309,52 @@ namespace weather
                 CustomMessageBox.Show(Strings.InvalidField, Strings.ERROR);
             }
 
+            location = $"{lat};{lng};{alt}";
+
             if (alt < 0)
             {
                 alt *= -1;
             }
 
-            return (lat, lng, alt);
+            PointLatLngAlt point = new PointLatLngAlt
+            {
+                Alt = alt,
+                Lat = lat,
+                Lng = lng
+            };
+
+            return point;
+        }
+
+        public static void UpdateOverlay(GMapOverlay weatheroverlay)
+        {
+            if (weatheroverlay == null)
+                return;
+            weatheroverlay.Clear();
+
+            foreach (var pnt in WeatherPts)
+            {
+                weatheroverlay.Markers.Add(new GMapMarkerWeather(pnt)
+                {
+                    ToolTipMode = MarkerTooltipMode.OnMouseOver,
+                    ToolTipText = pnt.Tag
+                });
+            }
+        }
+
+        public static void WeatherPtDelete(GMapMarkerWeather point)
+        {
+            if (point == null || !(FlightData.instance.CurrentGMapMarker is GMapMarkerWeather))
+                return;
+
+            for (int a = 0; a < WeatherPts.Count; a++)
+            {
+                if (WeatherPts[a].Point() == point.Position)
+                {
+                    WeatherPts.RemoveAt(a);
+                    return;
+                }
+            }
         }
 
         public override bool Loop()
