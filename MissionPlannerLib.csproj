@@ -405,6 +405,8 @@
 
    <Compile Include="ExtLibs\Comms\System.IO.Ports\WinSerialStream.cs" />
 
+   <Compile Include="plugins\weather.cs" />
+
    <Compile Include="plugins\example-watchbutton.cs" />
 
    <Compile Include="plugins\example.cs" />

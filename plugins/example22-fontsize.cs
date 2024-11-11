@@ -22,7 +22,7 @@ namespace MissionPlanner.plugins
 
         public override bool Init()
         {
-            Debugger.Break();
+            //Debugger.Break();
             Console.WriteLine("Font name: " + SystemFonts.DefaultFont.Name);
             Console.WriteLine("Font size: " + SystemFonts.DefaultFont.Size);
 
