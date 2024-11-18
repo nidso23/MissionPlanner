@@ -18,7 +18,8 @@ namespace weather
     public class Weather : MissionPlanner.Plugin.Plugin
     {
         static ObservableCollection<PointLatLngAlt> WeatherPts = new ObservableCollection<PointLatLngAlt>();
-        private GMapOverlay weatheroverlay;
+        private GMapOverlay _weatheroverlay;
+        private GMapOverlay _weatheroverlayFP;
 
         public override string Name
         {
@@ -37,9 +38,13 @@ namespace weather
 
         public override bool Init()
         {
-            weatheroverlay = new GMapOverlay("Weather");
-            weatheroverlay.IsVisibile = true;
-            Host.FDGMapControl.Overlays.Add(weatheroverlay);
+            _weatheroverlay = new GMapOverlay("Weather");
+            _weatheroverlay.IsVisibile = true;
+            Host.FDGMapControl.Overlays.Add(_weatheroverlay);
+
+            _weatheroverlayFP = new GMapOverlay("Weather");
+            _weatheroverlayFP.IsVisibile = true;
+            Host.FPGMapControl.Overlays.Add(_weatheroverlayFP);
 
             return true;
         }
@@ -47,81 +52,101 @@ namespace weather
         public override bool Loaded()
         {
             var rootbut = new ToolStripMenuItem("Weather");
+            Controls(rootbut, "D");
             ToolStripItemCollection col = Host.FDMenuMap.Items;
             col.Add(rootbut);
 
+            var rootbutFP = new ToolStripMenuItem("Weather");
+            Controls(rootbutFP, "P");
+            ToolStripItemCollection colFP = Host.FPMenuMap.Items;
+            colFP.Add(rootbutFP);
+
+            return true;
+        }
+
+        private void Controls(ToolStripMenuItem rootbut, string map)
+        {
             var but = new ToolStripMenuItem("Wind");
             but.Click += async (s, e) =>
             {
-                PointLatLngAlt point = GetLocation();
-                
+                PointLatLngAlt point = GetLocation(map);
+
                 try
                 {
-                    HttpResponseMessage response = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "wind");
-                    string jsonResponse = await response.Content.ReadAsStringAsync();
-                    WeatherAPI weatherResponse = JsonConvert.DeserializeObject<WeatherAPI>(jsonResponse);
+                    WeatherAPI weatherResponse = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "wind");
                     MessageBox.Show(GetWindData(weatherResponse, point));
                 }
                 catch (Exception ex)
                 {
                     CustomMessageBox.Show(Strings.ERROR, ex.Message);
                 }
-                UpdateOverlay(weatheroverlay);
+                UpdateOverlay(_weatheroverlay);
+                UpdateOverlay(_weatheroverlayFP);
             };
             rootbut.DropDownItems.Add(but);
 
             but = new ToolStripMenuItem("Ocean Current");
             but.Click += async (s, e) => {
-                PointLatLngAlt point = GetLocation();
-                
+                PointLatLngAlt point = GetLocation(map);
+
                 try
                 {
-                    HttpResponseMessage response = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "current");
-                    string jsonResponse = await response.Content.ReadAsStringAsync();
-                    WeatherAPI weatherResponse = JsonConvert.DeserializeObject<WeatherAPI>(jsonResponse);
+                    WeatherAPI weatherResponse = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "current");
                     MessageBox.Show(GetCurrentData(weatherResponse, point));
                 }
                 catch (Exception ex)
                 {
                     CustomMessageBox.Show(Strings.ERROR, ex.Message);
                 }
-                UpdateOverlay(weatheroverlay);
+                UpdateOverlay(_weatheroverlay);
+                UpdateOverlay(_weatheroverlayFP);
             };
             rootbut.DropDownItems.Add(but);
 
             but = new ToolStripMenuItem("Ocean Waves");
             but.Click += async (s, e) => {
-                PointLatLngAlt point = GetLocation();
+                PointLatLngAlt point = GetLocation(map);
 
                 try
                 {
-                    HttpResponseMessage response = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "wave");
-                    string jsonResponse = await response.Content.ReadAsStringAsync();
-                    WeatherAPI weatherResponse = JsonConvert.DeserializeObject<WeatherAPI>(jsonResponse);
+                    WeatherAPI weatherResponse = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "wave");
                     MessageBox.Show(GetWaveData(weatherResponse, point));
                 }
                 catch (Exception ex)
                 {
                     CustomMessageBox.Show(Strings.ERROR, ex.Message);
                 }
-                UpdateOverlay(weatheroverlay);
+                UpdateOverlay(_weatheroverlay);
+                UpdateOverlay(_weatheroverlayFP);
             };
             rootbut.DropDownItems.Add(but);
 
             but = new ToolStripMenuItem("Delete");
             but.Click += (s, e) => {
-                WeatherPtDelete((GMapMarkerWeather)FlightData.instance.CurrentGMapMarker);
-                UpdateOverlay(weatheroverlay);
+                if (FlightData.instance.CurrentGMapMarker != null && FlightData.instance.CurrentGMapMarker is GMapMarkerWeather && map == "D")
+                {
+                    WeatherPtDelete((GMapMarkerWeather)FlightData.instance.CurrentGMapMarker);
+                    UpdateOverlay(_weatheroverlay);
+                    UpdateOverlay(_weatheroverlayFP);
+                }
+                else if (FlightPlanner.instance.currentMarker != null && FlightPlanner.instance.currentMarker is GMapMarkerWeather && map == "P") //Weather markers in planner become GMarkerGoogle type
+                {
+                    WeatherPtDelete((GMapMarkerWeather)FlightPlanner.instance.currentMarker);
+                    UpdateOverlay(_weatheroverlay);
+                    UpdateOverlay(_weatheroverlayFP);
+                }
             };
             rootbut.DropDownItems.Add(but);
-
-            return true;
         }
 
         private readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri("http://192.168.110.32:8189/") };
 
-        public async Task<HttpResponseMessage> GetWeatherData(DateTimeOffset dateTime, double latitude, double longitude, double altitude, string model)
-            => await _client.GetAsync($"/weatherapi/1.0/weather?latitude={latitude}&longitude={longitude}&altitude={altitude}&time={CreateDate(dateTime)}&model={model}");
+        public async Task<WeatherAPI> GetWeatherData(DateTimeOffset dateTime, double latitude, double longitude, double altitude, string model)
+        {
+            HttpResponseMessage response = await _client.GetAsync($"/weatherapi/1.0/weather?latitude={latitude}&longitude={longitude}&altitude={altitude}&time={CreateDate(dateTime)}&model={model}");
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<WeatherAPI>(jsonResponse);
+        }
 
         private string GetWindData(WeatherAPI data, PointLatLngAlt point)
         {
@@ -287,10 +312,29 @@ namespace weather
             return timeString;
         }
 
-        private PointLatLngAlt GetLocation()
+        private PointLatLngAlt GetLocation(string map)
         {
-            double lat = Host.FDMenuMapPosition.Lat;
-            double lng = Host.FDMenuMapPosition.Lng;
+            //double lat = Host.FDMenuMapPosition.Lat;
+            //double lng = Host.FDMenuMapPosition.Lng;
+
+            //if (lat == 0 && lng == 0)
+            //{
+            //    lat = Host.FPMenuMapPosition.Lat;
+            //    lng = Host.FPMenuMapPosition.Lng;
+            //}
+
+            double lat;
+            double lng;
+            if (map == "D")
+            {
+                lat = Host.FDMenuMapPosition.Lat;
+                lng = Host.FDMenuMapPosition.Lng;
+            }
+            else
+            {
+                lat = Host.FPMenuMapPosition.Lat;
+                lng = Host.FPMenuMapPosition.Lng;
+            }
 
             string location = $"{lat};{lng};0";
             double alt = 0;
@@ -344,9 +388,6 @@ namespace weather
 
         public static void WeatherPtDelete(GMapMarkerWeather point)
         {
-            if (point == null || !(FlightData.instance.CurrentGMapMarker is GMapMarkerWeather))
-                return;
-
             for (int a = 0; a < WeatherPts.Count; a++)
             {
                 if (WeatherPts[a].Point() == point.Position)
