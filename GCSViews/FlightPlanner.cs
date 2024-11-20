@@ -8197,5 +8197,11 @@ Column 1: Field type (RALLY is the only one at the moment -- may have RALLY_LAND
             CustomMessageBox.Show("Number of tiles loaded per zoom : " + Environment.NewLine + results, "Injecting Custom Map Results");
             map.Dispose();
         }
+
+        private void BUT_MpaMap_Click(object sender, EventArgs e)
+        {
+            //new PropagationSettings().Show();
+            new MpaMaps().Show();
+        }
     }
 }

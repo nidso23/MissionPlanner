@@ -314,15 +314,6 @@ namespace weather
 
         private PointLatLngAlt GetLocation(string map)
         {
-            //double lat = Host.FDMenuMapPosition.Lat;
-            //double lng = Host.FDMenuMapPosition.Lng;
-
-            //if (lat == 0 && lng == 0)
-            //{
-            //    lat = Host.FPMenuMapPosition.Lat;
-            //    lng = Host.FPMenuMapPosition.Lng;
-            //}
-
             double lat;
             double lng;
             if (map == "D")

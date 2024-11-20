@@ -114,6 +114,7 @@ namespace MissionPlanner.GCSViews
             this.panel3 = new System.Windows.Forms.Panel();
             this.progressBarInjectCustomMap = new System.Windows.Forms.ProgressBar();
             this.BUT_InjectCustomMap = new MissionPlanner.Controls.MyButton();
+            this.BUT_MpaMap = new MissionPlanner.Controls.MyButton();
             this.chk_grid = new System.Windows.Forms.CheckBox();
             this.comboBoxMapType = new System.Windows.Forms.ComboBox();
             this.lnk_kml = new System.Windows.Forms.LinkLabel();
@@ -701,6 +702,7 @@ namespace MissionPlanner.GCSViews
             this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel3.Controls.Add(this.progressBarInjectCustomMap);
             this.panel3.Controls.Add(this.BUT_InjectCustomMap);
+            this.panel3.Controls.Add(this.BUT_MpaMap);
             this.panel3.Controls.Add(this.chk_grid);
             this.panel3.Controls.Add(this.lbl_status);
             this.panel3.Controls.Add(this.comboBoxMapType);
@@ -720,6 +722,13 @@ namespace MissionPlanner.GCSViews
             this.BUT_InjectCustomMap.Name = "BUT_InjectCustomMap";
             this.BUT_InjectCustomMap.UseVisualStyleBackColor = true;
             this.BUT_InjectCustomMap.Click += new System.EventHandler(this.BUT_InjectCustomMap_Click);
+            // 
+            // BUT_MpaMap
+            // 
+            resources.ApplyResources(this.BUT_MpaMap, "BUT_MpaMap");
+            this.BUT_MpaMap.Name = "BUT_MpaMap";
+            this.BUT_MpaMap.UseVisualStyleBackColor = true;
+            this.BUT_MpaMap.Click += new System.EventHandler(this.BUT_MpaMap_Click);
             // 
             // chk_grid
             // 
@@ -1748,6 +1757,7 @@ namespace MissionPlanner.GCSViews
         private DataGridViewTextBoxColumn TagData;
         private ToolStripMenuItem gDALOpacityToolStripMenuItem;
         private MyButton BUT_InjectCustomMap;
+        private MyButton BUT_MpaMap;
         private ProgressBar progressBarInjectCustomMap;
         private NumericUpDown Zoomlevel;
     }

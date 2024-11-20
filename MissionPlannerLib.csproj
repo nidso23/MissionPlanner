@@ -570,6 +570,7 @@
    <ProjectReference Include="ExtLibs\Zeroconf\Zeroconf\Zeroconf.csproj" />
  </ItemGroup> 
   <ItemGroup>
+    <Compile Update="Controls\MpaMaps.cs" />
     <Compile Update="ExtLibs\ObjectListView\Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -582,6 +583,9 @@
     </Compile>
   </ItemGroup> 
   <ItemGroup>
+    <EmbeddedResource Update="Controls\MpaMaps.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Update="ExtLibs\ObjectListView\Properties\Resources.resx">
       <CustomToolNamespace>BrightIdeasSoftware.Properties</CustomToolNamespace>
       <Generator>PublicResXFileCodeGenerator</Generator>

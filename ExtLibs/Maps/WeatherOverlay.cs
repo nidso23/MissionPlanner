@@ -19,7 +19,6 @@ namespace MissionPlanner.Maps
     {
         public static readonly WeatherOverlay Instance;
         private readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri(URL) };
-        private Dictionary<string, Dictionary<string, RegionModelData>> _data;
 
         WeatherOverlay()
         {
@@ -36,6 +35,7 @@ namespace MissionPlanner.Maps
 
             list.Add(Instance.DbId, Instance);
 
+            Instance.IsSet = false;
             Instance.LoadFromMpaUrl();
         }
 
@@ -84,8 +84,17 @@ namespace MissionPlanner.Maps
 
         string MakeTileImageUrl(GPoint pos, int zoom, string language)
         {
+            if (IsSet)
+            {
+                var selectedRegion = RegionModelData[Region];
+                var selectedModel = selectedRegion[Model];
+                string selectedFile = selectedModel.AvailableFiles[Time][0];
+                selectedFile = selectedFile.Replace("{level}", Level).Replace("{param}", Parameter);
+
+                return URL + $"tiles/{zoom}/{pos.X}/{pos.Y}.png?url={selectedFile}&bidx=1&colormap_name={Parameter}";
+            }
             string file0 = string.Empty;
-            var region = _data["global_surface"];
+            var region = RegionModelData["global_surface"];
             var model = region["gfs_atmo"];
             foreach (var file in model.AvailableFiles.Values)
             {
@@ -100,7 +109,7 @@ namespace MissionPlanner.Maps
 
         public async void LoadFromMpaUrl()
         {
-            _data = new Dictionary<string, Dictionary<string, RegionModelData>>();
+            RegionModelData = new Dictionary<string, Dictionary<string, RegionModelData>>();
             try
             {
                 var response = await _client.GetAsync("region");
@@ -117,7 +126,7 @@ namespace MissionPlanner.Maps
                     RegionModelData regionModelData = await GetRegionModelDataAsync(region, model);
                     modelData.Add(model, regionModelData);
                 }
-                _data.Add(region, modelData);
+                RegionModelData.Add(region, modelData);
             }
         }
 
@@ -141,6 +150,14 @@ namespace MissionPlanner.Maps
             string jsonResponse = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<RegionModelData>(jsonResponse);
         }
+
+        public Dictionary<string, Dictionary<string, RegionModelData>> RegionModelData { get; set; }
+        public string Time { get; set; }
+        public string Level { get; set; }
+        public string Parameter { get; set; }
+        public string Model { get; set; }
+        public string Region { get; set; } 
+        public bool IsSet { get; set; }
     }
 
     public class Regions

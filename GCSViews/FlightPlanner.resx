@@ -1367,6 +1367,30 @@
   <data name="&gt;&gt;BUT_InjectCustomMap.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
+  <data name="BUT_MpaMap.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 100</value>
+  </data>
+  <data name="BUT_MpaMap.Size" type="System.Drawing.Size, System.Drawing">
+	<value>115, 23</value>
+  </data>
+  <data name="BUT_MpaMap.TabIndex" type="System.Int32, mscorlib">
+	<value>46</value>
+  </data>
+  <data name="BUT_MpaMap.Text" xml:space="preserve">
+    <value>Mpa Map</value>
+  </data>
+	<data name="&gt;&gt;BUT_MpaMap.Name" xml:space="preserve">
+    <value>BUT_MpaMap</value>
+  </data>
+	<data name="&gt;&gt;BUT_MpaMap.Type" xml:space="preserve">
+    <value>MissionPlanner.Controls.MyButton, MissionPlanner.Controls, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+	<data name="&gt;&gt;BUT_MpaMap.Parent" xml:space="preserve">
+    <value>panel3</value>
+  </data>
+	<data name="&gt;&gt;BUT_MpaMap.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
   <data name="chk_grid.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
