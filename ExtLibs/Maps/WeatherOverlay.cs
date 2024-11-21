@@ -20,28 +20,35 @@ namespace MissionPlanner.Maps
         public static readonly WeatherOverlay Instance;
         private readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri(URL) };
 
-        WeatherOverlay()
+        //WeatherOverlay()
+        //{
+        //    MaxZoom = 24;
+        //}
+
+        //static WeatherOverlay()
+        //{
+        //    Instance = new WeatherOverlay();
+
+        //    Type mytype = typeof(GMapProviders);
+        //    FieldInfo field = mytype.GetField("DbHash", BindingFlags.Static | BindingFlags.NonPublic);
+        //    Dictionary<int, GMapProvider> list = (Dictionary<int, GMapProvider>)field.GetValue(Instance);
+
+        //    list.Add(Instance.DbId, Instance);
+
+        //    Instance.IsSet = false;
+        //    Instance.LoadFromMpaUrl();
+        //}
+
+        public WeatherOverlay()
         {
             MaxZoom = 24;
-        }
-
-        static WeatherOverlay()
-        {
-            Instance = new WeatherOverlay();
-
-            Type mytype = typeof(GMapProviders);
-            FieldInfo field = mytype.GetField("DbHash", BindingFlags.Static | BindingFlags.NonPublic);
-            Dictionary<int, GMapProvider> list = (Dictionary<int, GMapProvider>)field.GetValue(Instance);
-
-            list.Add(Instance.DbId, Instance);
-
-            Instance.IsSet = false;
-            Instance.LoadFromMpaUrl();
+            IsSet = false;
+            LoadFromMpaUrl();
         }
 
         #region GMapProvider Members
 
-        readonly Guid id = new Guid("4574218D-B552-4CAF-89AE-F20951CFDB2A");
+        readonly Guid id = new Guid("4574218D-B552-4CAF-89AE-F20951CFDB2" + new Random().Next(0,9).ToString());
 
         public override Guid Id
         {

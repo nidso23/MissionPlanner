@@ -1,5 +1,7 @@
-﻿using GMap.NET.MapProviders;
+﻿using GMap.NET;
+using GMap.NET.MapProviders;
 using log4net.Core;
+using Microsoft.Diagnostics.Runtime.Interop;
 using MissionPlanner.GCSViews;
 using MissionPlanner.Maps;
 using MissionPlanner.Utilities;
@@ -26,13 +28,15 @@ namespace MissionPlanner.Controls
         private Label labelTime;
         private ComboBox TimeBox;
         private Button buttonOkay;
-        //public static string URL = "http://192.168.110.32:8111/cog/";
-        //private readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri(URL) };
-        //private Dictionary<string, Dictionary<string, RegionModelData>> _data;
+        public static string URL = "http://192.168.110.32:8111/cog/";
+        private readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri(URL) };
+        private Dictionary<string, Dictionary<string, RegionModelData>> _data;
         //private List<string> _availableRegions;
+        private readonly WeatherOverlay _overlay;
 
         public MpaMaps()
         {
+            _overlay = new WeatherOverlay();
             //LoadFromMpaUrl();
             InitializeComponent();
 
@@ -42,8 +46,9 @@ namespace MissionPlanner.Controls
             //ModelBox.Text = Settings.Instance.GetInt32("ModelBox", 1).ToString();
         }
 
-        private void InitializeComponent()
+        private async void InitializeComponent()
         {
+            _data = await LoadFromMpaUrl();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MpaMaps));
             this.labelRegion = new System.Windows.Forms.Label();
             this.RegionBox = new System.Windows.Forms.ComboBox();
@@ -190,41 +195,60 @@ namespace MissionPlanner.Controls
 
         private void OnClickOkayButton(object sender, EventArgs e)
         {
-            WeatherOverlay.Instance.Region = RegionBox.Text;
-            WeatherOverlay.Instance.Model = ModelBox.Text;
-            WeatherOverlay.Instance.Parameter = ParameterBox.Text;
-            WeatherOverlay.Instance.Level = LevelBox.Text;
-            WeatherOverlay.Instance.Time = TimeBox.Text;
-            WeatherOverlay.Instance.IsSet = true;
-            FlightPlanner.instance.MainMap.MapProvider = WeatherOverlay.Instance;
-            FlightData.mymap.MapProvider = WeatherOverlay.Instance;
+            foreach (var map in GMapProviders.List)
+            {
+                if (map.Name == "WeatherOverlay Custom")
+                {
+                    GMapProviders.List.Remove(map);
+                }
+            }
+            _overlay.Region = RegionBox.Text;
+            _overlay.Model = ModelBox.Text;
+            _overlay.Parameter = ParameterBox.Text;
+            _overlay.Level = LevelBox.Text;
+            _overlay.Time = TimeBox.Text;
+            _overlay.IsSet = true;
+            GMapProviders.List.Add(_overlay);
+            FlightPlanner.instance.comboBoxMapType.DataSource = GMapProviders.List.ToArray();
+            int index = FlightPlanner.instance.comboBoxMapType.FindString("WeatherOverlay");
+            if (index != -1)
+            {
+                FlightPlanner.instance.comboBoxMapType.SelectedIndex = index;
+
+                //Clear memory cache and force map reload
+                GMaps.Instance.MemoryCache.Clear();
+                FlightPlanner.instance.MainMap.Core.ReloadMap();
+                FlightData.mymap.Core.ReloadMap();
+                FlightPlanner.instance.MainMap.Refresh();
+                FlightData.mymap.Refresh();
+            }
             this.Close();
         }
 
         private void SetRegionItems()
         {
             List<string> regions = new List<string>();
-            foreach (var key in WeatherOverlay.Instance.RegionModelData.Keys)
+            foreach (var key in _data.Keys)
             {
                 regions.Add(key);
             }
-            object[] regionObject = new object[WeatherOverlay.Instance.RegionModelData.Count];
+            object[] regionObject = new object[_data.Count];
             for (int i = 0; i < regionObject.Length; i++)
             {
                 regionObject[i] = regions[i];
             }
-            this.RegionBox.Items.AddRange(regionObject);
-            this.RegionBox.Text = regions[0];
+            RegionBox.Items.AddRange(regionObject);
+            RegionBox.Text = regions[0];
         }
 
         private void SetModelItems()
         {
             List<string> models = new List<string>();
-            foreach (var key in WeatherOverlay.Instance.RegionModelData[RegionBox.Text].Keys)
+            foreach (var key in _data[RegionBox.Text].Keys)
             {
                 models.Add(key);
             }
-            object[] modelObject = new object[WeatherOverlay.Instance.RegionModelData[RegionBox.Text].Count];
+            object[] modelObject = new object[_data[RegionBox.Text].Count];
             for (int i = 0; i < modelObject.Length; i++)
             {
                 modelObject[i] = models[i];
@@ -237,11 +261,11 @@ namespace MissionPlanner.Controls
         private void SetParameterItems()
         {
             List<string> parameters = new List<string>();
-            foreach (var key in WeatherOverlay.Instance.RegionModelData[RegionBox.Text][ModelBox.Text].AvailableParams.Keys)
+            foreach (var key in _data[RegionBox.Text][ModelBox.Text].AvailableParams.Keys)
             {
                 parameters.Add(key);
             }
-            object[] paramObject = new object[WeatherOverlay.Instance.RegionModelData[RegionBox.Text][ModelBox.Text].AvailableParams.Count];
+            object[] paramObject = new object[_data[RegionBox.Text][ModelBox.Text].AvailableParams.Count];
             for (int i = 0; i < paramObject.Length; i++)
             {
                 paramObject[i] = parameters[i];
@@ -263,7 +287,7 @@ namespace MissionPlanner.Controls
             LevelBox.Items.Clear();
             if (ParameterBox.Items.Count > 0)
             {
-                var levels = WeatherOverlay.Instance.RegionModelData[RegionBox.Text][ModelBox.Text].AvailableParams[ParameterBox.Text];
+                var levels = _data[RegionBox.Text][ModelBox.Text].AvailableParams[ParameterBox.Text];
 
                 object[] levelObject = new object[levels.Count];
                 for (int i = 0; i < levelObject.Length; i++)
@@ -281,7 +305,7 @@ namespace MissionPlanner.Controls
         private void SetTimeItems()
         {
             TimeBox.Items.Clear();
-            var times = WeatherOverlay.Instance.RegionModelData[RegionBox.Text][ModelBox.Text].AvailableTimes;
+            var times = _data[RegionBox.Text][ModelBox.Text].AvailableTimes;
 
             object[] timeObject = new object[times.Count];
             for (int i = 0; i < timeObject.Length; i++)
@@ -291,73 +315,74 @@ namespace MissionPlanner.Controls
             TimeBox.Items.AddRange(timeObject);
         }
 
-        //public async void LoadFromMpaUrl()
-        //{
-        //    _data = new Dictionary<string, Dictionary<string, RegionModelData>>();
-        //    try
-        //    {
-        //        var response = await _client.GetAsync("region");
-        //        //response.EnsureSuccessStatusCode();
-        //    }
-        //    catch { }
-        //    Regions regions = await GetRegionsAsync();
-        //    _availableRegions = regions.AvailableRegions;
-        //    foreach (string region in regions.AvailableRegions)
-        //    {
-        //        ModelsResponse models = await GetModelsAsync(region);
-        //        Dictionary<string, RegionModelData> modelData = new Dictionary<string, RegionModelData>();
-        //        foreach (string model in models.AvailableModels)
-        //        {
-        //            RegionModelData regionModelData = await GetRegionModelDataAsync(region, model);
-        //            modelData.Add(model, regionModelData);
-        //        }
-        //        _data.Add(region, modelData);
-        //    }
-        //}
+        public async Task<Dictionary<string, Dictionary<string, RegionModelData>>> LoadFromMpaUrl()
+        {
+            Dictionary<string, Dictionary<string, RegionModelData>> data = new Dictionary<string, Dictionary<string, RegionModelData>>();
+            try
+            {
+                var response = await _client.GetAsync("region");
+                //response.EnsureSuccessStatusCode();
+            }
+            catch { }
+            Regions regions = await GetRegionsAsync();
+            //_availableRegions = regions.AvailableRegions;
+            foreach (string region in regions.AvailableRegions)
+            {
+                ModelsResponse models = await GetModelsAsync(region);
+                Dictionary<string, RegionModelData> modelData = new Dictionary<string, RegionModelData>();
+                foreach (string model in models.AvailableModels)
+                {
+                    RegionModelData regionModelData = await GetRegionModelDataAsync(region, model);
+                    modelData.Add(model, regionModelData);
+                }
+                data.Add(region, modelData);
+            }
+            return data;
+        }
 
-        //private async Task<Regions> GetRegionsAsync()
-        //{
-        //    HttpResponseMessage response = await _client.GetAsync("region");
-        //    string jsonResponse = await response.Content.ReadAsStringAsync();
-        //    return JsonConvert.DeserializeObject<Regions>(jsonResponse);
-        //}
+        private async Task<Regions> GetRegionsAsync()
+        {
+            HttpResponseMessage response = await _client.GetAsync("region");
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<Regions>(jsonResponse);
+        }
 
-        //private async Task<ModelsResponse> GetModelsAsync(string region)
-        //{
-        //    HttpResponseMessage response = await _client.GetAsync($"model/{region}");
-        //    string jsonResponse = await response.Content.ReadAsStringAsync();
-        //    return JsonConvert.DeserializeObject<ModelsResponse>(jsonResponse);
-        //}
+        private async Task<ModelsResponse> GetModelsAsync(string region)
+        {
+            HttpResponseMessage response = await _client.GetAsync($"model/{region}");
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<ModelsResponse>(jsonResponse);
+        }
 
-        //private async Task<RegionModelData> GetRegionModelDataAsync(string region, string model)
-        //{
-        //    HttpResponseMessage response = await _client.GetAsync($"available/{region}/{model}?latest=True");
-        //    string jsonResponse = await response.Content.ReadAsStringAsync();
-        //    return JsonConvert.DeserializeObject<RegionModelData>(jsonResponse);
-        //}
+        private async Task<RegionModelData> GetRegionModelDataAsync(string region, string model)
+        {
+            HttpResponseMessage response = await _client.GetAsync($"available/{region}/{model}?latest=True");
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<RegionModelData>(jsonResponse);
+        }
     }
 
-    //public class Regions
-    //{
-    //    [JsonProperty(PropertyName = "available_regions")]
-    //    public List<string> AvailableRegions = null;
-    //}
+    public class Regions
+    {
+        [JsonProperty(PropertyName = "available_regions")]
+        public List<string> AvailableRegions = null;
+    }
 
-    //public class ModelsResponse
-    //{
-    //    [JsonProperty(PropertyName = "available_models")]
-    //    public List<string> AvailableModels = null;
-    //}
+    public class ModelsResponse
+    {
+        [JsonProperty(PropertyName = "available_models")]
+        public List<string> AvailableModels = null;
+    }
 
-    //public class RegionModelData
-    //{
-    //    [JsonProperty(PropertyName = "available_times")]
-    //    public List<string> AvailableTimes = null;
+    public class RegionModelData
+    {
+        [JsonProperty(PropertyName = "available_times")]
+        public List<string> AvailableTimes = null;
 
-    //    [JsonProperty(PropertyName = "available_parameters")]
-    //    public Dictionary<string, List<int?>> AvailableParams = null;
+        [JsonProperty(PropertyName = "available_parameters")]
+        public Dictionary<string, List<int?>> AvailableParams = null;
 
-    //    [JsonProperty(PropertyName = "available_files")]
-    //    public Dictionary<string, List<string>> AvailableFiles = null;
-    //}
+        [JsonProperty(PropertyName = "available_files")]
+        public Dictionary<string, List<string>> AvailableFiles = null;
+    }
 }

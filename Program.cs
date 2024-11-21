@@ -31,6 +31,7 @@ using Newtonsoft.Json.Serialization;
 using Architecture = System.Runtime.InteropServices.Architecture;
 using Trace = System.Diagnostics.Trace;
 using System.Threading.Tasks;
+using MissionPlanner.Maps;
 
 namespace MissionPlanner
 {
@@ -341,7 +342,6 @@ namespace MissionPlanner
             GMap.NET.MapProviders.GMapProviders.List.Add(Maps.Japan_Relief.Instance);
             GMap.NET.MapProviders.GMapProviders.List.Add(Maps.Japan_Slopezone.Instance);
             GMap.NET.MapProviders.GMapProviders.List.Add(Maps.Japan_Sea.Instance);
-            GMap.NET.MapProviders.GMapProviders.List.Add(Maps.WeatherOverlay.Instance);
 
             if(Xamarin.Essentials.DeviceInfo.Idiom == Xamarin.Essentials.DeviceIdiom.Desktop || Xamarin.Essentials.DeviceInfo.Idiom == Xamarin.Essentials.DeviceIdiom.Unknown)
                 ZedGraph.PaneBase.Default.IsFontsScaled = false;
