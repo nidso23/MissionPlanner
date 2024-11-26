@@ -93,7 +93,7 @@ namespace weather
                 try
                 {
                     WeatherAPI weatherResponse = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "current");
-                    MessageBox.Show(GetCurrentData(weatherResponse, point));
+                    CustomMessageBox.Show(GetCurrentData(weatherResponse, point));
                 }
                 catch (Exception ex)
                 {
@@ -111,7 +111,7 @@ namespace weather
                 try
                 {
                     WeatherAPI weatherResponse = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "wave");
-                    MessageBox.Show(GetWaveData(weatherResponse, point));
+                    CustomMessageBox.Show(GetWaveData(weatherResponse, point));
                 }
                 catch (Exception ex)
                 {
