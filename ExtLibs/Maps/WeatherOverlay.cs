@@ -11,6 +11,7 @@ namespace MissionPlanner.Maps
     using Newtonsoft.Json;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using System.Globalization;
 
     /// <summary>
     /// WeatherOverlay Custom
@@ -19,31 +20,25 @@ namespace MissionPlanner.Maps
     {
         public static readonly WeatherOverlay Instance;
         private readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri(URL) };
+        public static string URL = "http://192.168.110.32:8111/cog/";
 
-        //WeatherOverlay()
-        //{
-        //    MaxZoom = 24;
-        //}
-
-        //static WeatherOverlay()
-        //{
-        //    Instance = new WeatherOverlay();
-
-        //    Type mytype = typeof(GMapProviders);
-        //    FieldInfo field = mytype.GetField("DbHash", BindingFlags.Static | BindingFlags.NonPublic);
-        //    Dictionary<int, GMapProvider> list = (Dictionary<int, GMapProvider>)field.GetValue(Instance);
-
-        //    list.Add(Instance.DbId, Instance);
-
-        //    Instance.IsSet = false;
-        //    Instance.LoadFromMpaUrl();
-        //}
-
-        public WeatherOverlay()
+        WeatherOverlay()
         {
             MaxZoom = 24;
-            IsSet = false;
-            LoadFromMpaUrl();
+        }
+
+        static WeatherOverlay()
+        {
+            Instance = new WeatherOverlay();
+
+            Type mytype = typeof(GMapProviders);
+            FieldInfo field = mytype.GetField("DbHash", BindingFlags.Static | BindingFlags.NonPublic);
+            Dictionary<int, GMapProvider> list = (Dictionary<int, GMapProvider>)field.GetValue(Instance);
+
+            list.Add(Instance.DbId, Instance);
+
+            Instance.IsSet = false;
+            Instance.LoadFromMpaUrl();
         }
 
         #region GMapProvider Members
@@ -100,21 +95,11 @@ namespace MissionPlanner.Maps
 
                 return URL + $"tiles/{zoom}/{pos.X}/{pos.Y}.png?url={selectedFile}&bidx=1&colormap_name={Parameter}";
             }
-            string file0 = string.Empty;
-            var region = RegionModelData["global_surface"];
-            var model = region["gfs_atmo"];
-            foreach (var file in model.AvailableFiles.Values)
-            {
-                file0 = file[0];
-            }
-            file0 = file0.Replace("{level}", "0").Replace("{param}", "wind_speed");
 
-            return URL + $"tiles/{zoom}/{pos.X}/{pos.Y}.png?url={file0}&bidx=1&colormap_name=wind_speed";
+            return string.Format(CultureInfo.InvariantCulture, "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}.png", zoom, pos.X, pos.Y);
         }
 
-        public static string URL = "http://192.168.110.32:8111/cog/";
-
-        public async void LoadFromMpaUrl()
+        private async void LoadFromMpaUrl()
         {
             RegionModelData = new Dictionary<string, Dictionary<string, RegionModelData>>();
             try

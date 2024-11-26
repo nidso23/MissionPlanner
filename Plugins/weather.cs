@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Forms;
 using MissionPlanner.GCSViews;
+using GMap.NET.WindowsForms.Markers;
 
 namespace weather
 {
@@ -52,19 +53,19 @@ namespace weather
         public override bool Loaded()
         {
             var rootbut = new ToolStripMenuItem("Weather");
-            Controls(rootbut, "D");
+            Controls(rootbut, FlightMenu.Data);
             ToolStripItemCollection col = Host.FDMenuMap.Items;
             col.Add(rootbut);
 
             var rootbutFP = new ToolStripMenuItem("Weather");
-            Controls(rootbutFP, "P");
+            Controls(rootbutFP, FlightMenu.Planner);
             ToolStripItemCollection colFP = Host.FPMenuMap.Items;
             colFP.Add(rootbutFP);
 
             return true;
         }
 
-        private void Controls(ToolStripMenuItem rootbut, string map)
+        private void Controls(ToolStripMenuItem rootbut, FlightMenu map)
         {
             var but = new ToolStripMenuItem("Wind");
             but.Click += async (s, e) =>
@@ -74,7 +75,7 @@ namespace weather
                 try
                 {
                     WeatherAPI weatherResponse = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "wind");
-                    MessageBox.Show(GetWindData(weatherResponse, point));
+                    CustomMessageBox.Show(GetWindData(weatherResponse, point));
                 }
                 catch (Exception ex)
                 {
@@ -123,15 +124,15 @@ namespace weather
 
             but = new ToolStripMenuItem("Delete");
             but.Click += (s, e) => {
-                if (FlightData.instance.CurrentGMapMarker != null && FlightData.instance.CurrentGMapMarker is GMapMarkerWeather && map == "D")
+                if (FlightData.instance.CurrentGMapMarker != null && FlightData.instance.CurrentGMapMarker is GMapMarkerWeather && map == FlightMenu.Data)
                 {
                     WeatherPtDelete((GMapMarkerWeather)FlightData.instance.CurrentGMapMarker);
                     UpdateOverlay(_weatheroverlay);
                     UpdateOverlay(_weatheroverlayFP);
                 }
-                else if (FlightPlanner.instance.currentMarker != null && FlightPlanner.instance.currentMarker is GMapMarkerWeather && map == "P") //Weather markers in planner become GMarkerGoogle type
+                else if (FlightPlanner.instance.currentMarker != null && FlightPlanner.instance.CurrentMarkerWeather is GMarkerGoogle && map == FlightMenu.Planner)
                 {
-                    WeatherPtDelete((GMapMarkerWeather)FlightPlanner.instance.currentMarker);
+                    WeatherPtDelete((GMapMarkerWeather)FlightPlanner.instance.CurrentMarkerWeather);
                     UpdateOverlay(_weatheroverlay);
                     UpdateOverlay(_weatheroverlayFP);
                 }
@@ -141,7 +142,7 @@ namespace weather
 
         private readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri("http://192.168.110.32:8189/") };
 
-        public async Task<WeatherAPI> GetWeatherData(DateTimeOffset dateTime, double latitude, double longitude, double altitude, string model)
+        private async Task<WeatherAPI> GetWeatherData(DateTimeOffset dateTime, double latitude, double longitude, double altitude, string model)
         {
             HttpResponseMessage response = await _client.GetAsync($"/weatherapi/1.0/weather?latitude={latitude}&longitude={longitude}&altitude={altitude}&time={CreateDate(dateTime)}&model={model}");
             string jsonResponse = await response.Content.ReadAsStringAsync();
@@ -312,11 +313,11 @@ namespace weather
             return timeString;
         }
 
-        private PointLatLngAlt GetLocation(string map)
+        private PointLatLngAlt GetLocation(FlightMenu map)
         {
             double lat;
             double lng;
-            if (map == "D")
+            if (map == FlightMenu.Data)
             {
                 lat = Host.FDMenuMapPosition.Lat;
                 lng = Host.FDMenuMapPosition.Lng;
@@ -361,7 +362,7 @@ namespace weather
             return point;
         }
 
-        public static void UpdateOverlay(GMapOverlay weatheroverlay)
+        private static void UpdateOverlay(GMapOverlay weatheroverlay)
         {
             if (weatheroverlay == null)
                 return;
@@ -377,7 +378,7 @@ namespace weather
             }
         }
 
-        public static void WeatherPtDelete(GMapMarkerWeather point)
+        private static void WeatherPtDelete(GMapMarkerWeather point)
         {
             for (int a = 0; a < WeatherPts.Count; a++)
             {
@@ -397,6 +398,12 @@ namespace weather
         public override bool Exit()
         {
             return true;
+        }
+
+        private enum FlightMenu
+        {
+            Data,
+            Planner
         }
     }
     public class WeatherAPI

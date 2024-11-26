@@ -143,7 +143,7 @@
     <value>6</value>
   </data>
   <data name="RegionBox.Location" type="System.Drawing.Point, System.Drawing">
-	<value>80, 13</value>
+	<value>90, 13</value>
   </data>
   <data name="RegionBox.Size" type="System.Drawing.Size, System.Drawing">
 	<value>120, 21</value>
@@ -185,7 +185,7 @@
     <value>6</value>
   </data>
   <data name="ModelBox.Location" type="System.Drawing.Point, System.Drawing">
-	<value>80, 36</value>
+	<value>90, 36</value>
   </data>
   <data name="ModelBox.Size" type="System.Drawing.Size, System.Drawing">
 	<value>120, 21</value>
@@ -227,7 +227,7 @@
     <value>6</value>
   </data>
   <data name="ParameterBox.Location" type="System.Drawing.Point, System.Drawing">
-	<value>80, 59</value>
+	<value>90, 59</value>
   </data>
   <data name="ParameterBox.Size" type="System.Drawing.Size, System.Drawing">
     <value>120, 21</value>
@@ -269,7 +269,7 @@
     <value>6</value>
   </data>
   <data name="LevelBox.Location" type="System.Drawing.Point, System.Drawing">
-	<value>80, 82</value>
+	<value>90, 82</value>
   </data>
   <data name="LevelBox.Size" type="System.Drawing.Size, System.Drawing">
 	<value>120, 21</value>
@@ -311,7 +311,7 @@
     <value>6</value>
   </data>
   <data name="TimeBox.Location" type="System.Drawing.Point, System.Drawing">
-	<value>80, 105</value>
+	<value>90, 105</value>
   </data>
   <data name="TimeBox.Size" type="System.Drawing.Size, System.Drawing">
 	<value>120, 21</value>
@@ -329,7 +329,7 @@
     <value>6</value>
   </data>
   <data name="buttonOkay.Location" type="System.Drawing.Point, System.Drawing">
-    <value>120, 150</value>
+    <value>200, 150</value>
   </data>
   <data name="buttonOkay.Size" type="System.Drawing.Size, System.Drawing">
 	<value>40, 21</value>
@@ -339,6 +339,21 @@
   </data>
   <data name="buttonOkay.Text" xml:space="preserve">
     <value>Ok</value>
+  </data>
+  <data name="buttonOkay.Enabled">
+	<value>false</value>
+  </data>
+  <data name="buttonPropagation.Location" type="System.Drawing.Point, System.Drawing">
+	<value>50, 150</value>
+  </data>
+  <data name="buttonPropagation.Size" type="System.Drawing.Size, System.Drawing">
+	<value>80, 21</value>
+  </data>
+  <data name="&gt;&gt;buttonPropagation.Name" xml:space="preserve">
+    <value>buttonPropagation</value>
+  </data>
+  <data name="buttonPropagation.Text" xml:space="preserve">
+    <value>Propagation</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
 	<value>True</value>

@@ -101,6 +101,7 @@ namespace MissionPlanner.GCSViews
         private altmode currentaltmode = (altmode) Settings.Instance.GetInt32("FPaltmode", (int)altmode.Relative);
         private GMapMarker CurrentGMapMarker;
         public GMapMarker currentMarker;
+        public GMapMarkerWeather CurrentMarkerWeather;
         private GMapMarkerPOI CurrentPOIMarker;
         private GMapMarkerRallyPt CurrentRallyPt;
         public GMapOverlay drawnpolygonsoverlay;
@@ -7797,6 +7798,11 @@ Column 1: Field type (RALLY is the only one at the moment -- may have RALLY_LAND
                 {
                     //CurrentGMapMarker = item;
                 }
+
+                if (item is GMapMarkerWeather)
+                {
+                    CurrentMarkerWeather = item as GMapMarkerWeather;
+                }
             }
         }
 
@@ -7831,6 +7837,11 @@ Column 1: Field type (RALLY is the only one at the moment -- may have RALLY_LAND
                 {
                     // when you click the context menu this triggers and causes problems
                     CurrentGMapMarker = null;
+                }
+
+                if (item is GMapMarkerWeather)
+                {
+                    CurrentMarkerWeather = null;
                 }
             }
         }
@@ -8200,7 +8211,6 @@ Column 1: Field type (RALLY is the only one at the moment -- may have RALLY_LAND
 
         private void BUT_MpaMap_Click(object sender, EventArgs e)
         {
-            //new PropagationSettings().Show();
             new MpaMaps().Show();
         }
     }
