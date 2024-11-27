@@ -329,7 +329,7 @@
     <value>6</value>
   </data>
   <data name="buttonOkay.Location" type="System.Drawing.Point, System.Drawing">
-    <value>200, 150</value>
+    <value>200, 130</value>
   </data>
   <data name="buttonOkay.Size" type="System.Drawing.Size, System.Drawing">
 	<value>40, 21</value>
@@ -344,7 +344,7 @@
 	<value>false</value>
   </data>
   <data name="buttonPropagation.Location" type="System.Drawing.Point, System.Drawing">
-	<value>50, 150</value>
+	<value>50, 130</value>
   </data>
   <data name="buttonPropagation.Size" type="System.Drawing.Size, System.Drawing">
 	<value>80, 21</value>
@@ -354,6 +354,54 @@
   </data>
   <data name="buttonPropagation.Text" xml:space="preserve">
     <value>Propagation</value>
+  </data>
+  <data name="labelUrl.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+	<value>NoControl</value>
+  </data>
+  <data name="labelUrl.Location" type="System.Drawing.Point, System.Drawing">
+	<value>13, 175</value>
+  </data>
+  <data name="labelUrl.Size" type="System.Drawing.Size, System.Drawing">
+	<value>71, 23</value>
+  </data>
+  <data name="labelUrl.TabIndex" type="System.Int32, mscorlib">
+	<value>0</value>
+  </data>
+  <data name="labelUrl.Text" xml:space="preserve">
+    <value>Url</value>
+  </data>
+  <data name="&gt;&gt;labelUrl.Name" xml:space="preserve">
+    <value>labelUrl</value>
+  </data>
+  <data name="&gt;&gt;labelUrl.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;labelUrl.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="TextBoxUrl.Location" type="System.Drawing.Point, System.Drawing">
+	<value>90, 175</value>
+  </data>
+  <data name="TextBoxUrl.Size" type="System.Drawing.Size, System.Drawing">
+	<value>120, 21</value>
+  </data>
+  <data name="TextBoxUrl.TabIndex" type="System.Int32, mscorlib">
+	<value>0</value>
+  </data>
+  <data name="&gt;&gt;TextBoxUrl.Name" xml:space="preserve">
+    <value>TextBoxUrl</value>
+  </data>
+  <data name="buttonUrl.Location" type="System.Drawing.Point, System.Drawing">
+	<value>220, 175</value>
+  </data>
+  <data name="buttonUrl.Size" type="System.Drawing.Size, System.Drawing">
+	<value>60, 21</value>
+  </data>
+  <data name="&gt;&gt;buttonUrl.Name" xml:space="preserve">
+    <value>buttonUrl</value>
+  </data>
+  <data name="buttonUrl.Text" xml:space="preserve">
+    <value>Load</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
 	<value>True</value>

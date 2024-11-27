@@ -22,6 +22,9 @@ namespace MissionPlanner.Controls
         private ComboBox TimeBox;
         private Button buttonOkay;
         private Button buttonPropagation;
+        private Label labelUrl;
+        private TextBox TextBoxUrl;
+        private Button buttonUrl;
 
         private bool _buttonLevelEnable = false;
         private bool _buttonTimeEnable = false;
@@ -47,6 +50,9 @@ namespace MissionPlanner.Controls
             this.TimeBox = new System.Windows.Forms.ComboBox();
             this.buttonOkay = new System.Windows.Forms.Button();
             this.buttonPropagation = new System.Windows.Forms.Button();
+            this.labelUrl = new System.Windows.Forms.Label();
+            this.TextBoxUrl = new System.Windows.Forms.TextBox();
+            this.buttonUrl = new System.Windows.Forms.Button();
             this.SuspendLayout();
             //
             // labelRegion
@@ -132,6 +138,24 @@ namespace MissionPlanner.Controls
             this.buttonPropagation.Click += new System.EventHandler(this.OnClickPropagationButton);
             resources.ApplyResources(this.buttonPropagation, "buttonPropagation");
             //
+            // labelUrl
+            //
+            resources.ApplyResources(this.labelUrl, "labelUrl");
+            this.labelUrl.Name = "labelUrl";
+            //
+            // TextBoxUrl
+            //
+            this.TextBoxUrl.Name = "TextBoxUrl";
+            this.TextBoxUrl.Text = WeatherOverlay.URL;
+            resources.ApplyResources(this.TextBoxUrl, "TextBoxUrl");
+            this.TextBoxUrl.TextChanged += new System.EventHandler(this.TextBoxUrl_TextChanged);
+            //
+            // buttonUrl
+            //
+            this.buttonUrl.Name = "buttonUrl";
+            this.buttonUrl.Click += new System.EventHandler(this.OnClickUrlButton);
+            resources.ApplyResources(this.buttonUrl, "buttonUrl");
+            //
             // MpaMaps
             //
             resources.ApplyResources(this, "$this");
@@ -147,6 +171,9 @@ namespace MissionPlanner.Controls
             this.Controls.Add(this.TimeBox);
             this.Controls.Add(this.buttonOkay);
             this.Controls.Add(this.buttonPropagation);
+            this.Controls.Add(this.labelUrl);
+            this.Controls.Add(this.TextBoxUrl);
+            this.Controls.Add(this.buttonUrl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "MpaMaps";
             this.ResumeLayout(false);
@@ -183,6 +210,12 @@ namespace MissionPlanner.Controls
         {
             _buttonTimeEnable = true;
             buttonOkay.Enabled = _buttonLevelEnable && _buttonTimeEnable;
+        }
+
+        private void TextBoxUrl_TextChanged(object sender, EventArgs e)
+        {
+            WeatherOverlay.URL = TextBoxUrl.Text;
+            WeatherOverlay.Instance.LoadFromMpaUrl();
         }
 
         private void OnClickOkayButton(object sender, EventArgs e)
@@ -231,8 +264,22 @@ namespace MissionPlanner.Controls
             new PropagationSettings().Show();
         }
 
+        private void OnClickUrlButton(object sender, EventArgs e)
+        {
+            if (WeatherOverlay.Instance.RegionModelData.Count == 0)
+            {
+                CustomMessageBox.Show("Unable to connect");
+            }
+            SetRegionItems();
+            SetModelItems();
+            SetParameterItems();
+            SetLevelItems();
+            SetTimeItems();
+        }
+
         private void SetRegionItems()
         {
+            RegionBox.Items.Clear();
             List<string> regions = new List<string>();
             foreach (var key in WeatherOverlay.Instance.RegionModelData.Keys)
             {
@@ -244,11 +291,19 @@ namespace MissionPlanner.Controls
                 regionObject[i] = regions[i];
             }
             RegionBox.Items.AddRange(regionObject);
-            RegionBox.Text = regions[0];
+            if (regions.Count > 0)
+            {
+                RegionBox.Text = regions[0];
+            }
         }
 
         private void SetModelItems()
         {
+            ModelBox.Items.Clear();
+            if (WeatherOverlay.Instance.RegionModelData.Count == 0)
+            {
+                return;
+            }
             List<string> models = new List<string>();
             foreach (var key in WeatherOverlay.Instance.RegionModelData[RegionBox.Text].Keys)
             {
@@ -259,13 +314,20 @@ namespace MissionPlanner.Controls
             {
                 modelObject[i] = models[i];
             }
-            ModelBox.Items.Clear();
             ModelBox.Items.AddRange(modelObject);
-            ModelBox.Text = models[0];
+            if (models.Count > 0)
+            {
+                ModelBox.Text = models[0];
+            }
         }
 
         private void SetParameterItems()
         {
+            ParameterBox.Items.Clear();
+            if (WeatherOverlay.Instance.RegionModelData.Count == 0)
+            {
+                return;
+            }
             List<string> parameters = new List<string>();
             foreach (var key in WeatherOverlay.Instance.RegionModelData[RegionBox.Text][ModelBox.Text].AvailableParams.Keys)
             {
@@ -276,7 +338,6 @@ namespace MissionPlanner.Controls
             {
                 paramObject[i] = parameters[i];
             }
-            ParameterBox.Items.Clear();
             ParameterBox.Items.AddRange(paramObject);
             if (parameters.Count == 0)
             {
@@ -295,6 +356,10 @@ namespace MissionPlanner.Controls
             buttonOkay.Enabled = false;
 
             LevelBox.Items.Clear();
+            if (WeatherOverlay.Instance.RegionModelData.Count == 0)
+            {
+                return;
+            }
             if (ParameterBox.Items.Count > 0)
             {
                 var levels = WeatherOverlay.Instance.RegionModelData[RegionBox.Text][ModelBox.Text].AvailableParams[ParameterBox.Text];
@@ -315,6 +380,10 @@ namespace MissionPlanner.Controls
         private void SetTimeItems()
         {
             TimeBox.Items.Clear();
+            if (WeatherOverlay.Instance.RegionModelData.Count == 0)
+            {
+                return;
+            }
             var times = WeatherOverlay.Instance.RegionModelData[RegionBox.Text][ModelBox.Text].AvailableTimes;
 
             object[] timeObject = new object[times.Count];

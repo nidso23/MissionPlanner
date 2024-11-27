@@ -19,7 +19,7 @@ namespace MissionPlanner.Maps
     public class WeatherOverlay : GMapProvider
     {
         public static readonly WeatherOverlay Instance;
-        private readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri(URL) };
+        private HttpClient _client;
         public static string URL = "http://192.168.110.32:8111/cog/";
 
         WeatherOverlay()
@@ -99,15 +99,19 @@ namespace MissionPlanner.Maps
             return string.Format(CultureInfo.InvariantCulture, "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}.png", zoom, pos.X, pos.Y);
         }
 
-        private async void LoadFromMpaUrl()
+        public async void LoadFromMpaUrl()
         {
+            _client =  new HttpClient() { BaseAddress = new Uri(URL) };
             RegionModelData = new Dictionary<string, Dictionary<string, RegionModelData>>();
             try
             {
                 var response = await _client.GetAsync("region");
                 response.EnsureSuccessStatusCode();
             }
-            catch { }
+            catch
+            {
+                return;
+            }
             Regions regions = await GetRegionsAsync();
             foreach (string region in regions.AvailableRegions)
             {
