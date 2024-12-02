@@ -2914,6 +2914,54 @@
 	<data name="&gt;&gt;BUT_mapCacheDir.ZOrder" xml:space="preserve">
     <value>81</value>
   </data>
+	<data name="label14.AutoSize" type="System.Boolean, mscorlib">
+		<value>True</value>
+	</data>
+	<data name="label14.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+		<value>NoControl</value>
+	</data>
+	<data name="label14.Location" type="System.Drawing.Point, System.Drawing">
+		<value>9, 683</value>
+	</data>
+	<data name="label14.Size" type="System.Drawing.Size, System.Drawing">
+		<value>96, 13</value>
+	</data>
+	<data name="label14.TabIndex" type="System.Int32, mscorlib">
+		<value>50</value>
+	</data>
+	<data name="label14.Text" xml:space="preserve">
+    <value>MPA Weather URL</value>
+  </data>
+	<data name="&gt;&gt;label14.Name" xml:space="preserve">
+    <value>label14</value>
+  </data>
+	<data name="&gt;&gt;label14.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+	<data name="&gt;&gt;label14.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+	<data name="&gt;&gt;label14.ZOrder" xml:space="preserve">
+    <value>79</value>
+  </data>
+	<data name="txt_mpa_url.Size" type="System.Drawing.Size, System.Drawing">
+		<value>386, 20</value>
+	</data>
+	<data name="txt_mpa_url.Location" type="System.Drawing.Point, System.Drawing">
+		<value>107, 683</value>
+	</data>
+	<data name="&gt;&gt;txt_mpa_url.ZOrder" xml:space="preserve">
+    <value>36</value>
+  </data>
+	<data name="txt_mpa_url.TabIndex" type="System.Int32, mscorlib">
+		<value>94</value>
+	</data>
+	<data name="&gt;&gt;txt_mpa_url.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+	<data name="&gt;&gt;txt_mpa_url.Name" xml:space="preserve">
+    <value>txt_mpa_url</value>
+  </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>

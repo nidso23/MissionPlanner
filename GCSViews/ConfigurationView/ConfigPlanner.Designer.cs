@@ -122,6 +122,8 @@
             this.CMB_mapCache = new System.Windows.Forms.ComboBox();
             this.label13 = new System.Windows.Forms.Label();
             this.BUT_mapCacheDir = new MissionPlanner.Controls.MyButton();
+            this.label14 = new System.Windows.Forms.Label();
+            this.txt_mpa_url = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.NUM_tracklength)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_gcsid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.num_linelength)).BeginInit();
@@ -882,6 +884,16 @@
             this.BUT_mapCacheDir.UseVisualStyleBackColor = true;
             this.BUT_mapCacheDir.Click += new System.EventHandler(this.BUT_mapCacheDir_Click);
             // 
+            // label14
+            // 
+            resources.ApplyResources(this.label14, "label14");
+            this.label14.Name = "label14";
+            // 
+            // txt_mpa_url
+            // 
+            resources.ApplyResources(this.txt_mpa_url, "txt_mpa_url");
+            this.txt_mpa_url.Name = "txt_mpa_url";
+            // 
             // ConfigPlanner
             // 
             resources.ApplyResources(this, "$this");
@@ -978,6 +990,8 @@
             this.Controls.Add(this.label13);
             this.Controls.Add(this.CMB_mapCache);
             this.Controls.Add(this.BUT_mapCacheDir);
+            this.Controls.Add(this.label14);
+            this.Controls.Add(this.txt_mpa_url);
             this.Name = "ConfigPlanner";
             this.Load += new System.EventHandler(this.ConfigPlanner_Load);
             ((System.ComponentModel.ISupportInitialize)(this.NUM_tracklength)).EndInit();
@@ -1083,5 +1097,7 @@
         private System.Windows.Forms.Label label13;
         public System.Windows.Forms.ComboBox CMB_mapCache;
         private Controls.MyButton BUT_mapCacheDir;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.TextBox txt_mpa_url;
     }
 }

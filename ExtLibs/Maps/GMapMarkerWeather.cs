@@ -8,7 +8,7 @@ namespace MissionPlanner.Maps
     public class GMapMarkerWeather : GMarkerGoogle
     {
         public GMapMarkerWeather(PointLatLng p)
-            : base(p, GMarkerGoogleType.red_dot)
+            : base(p, GMarkerGoogleType.yellow_small)
         {
         }
     }

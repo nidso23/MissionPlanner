@@ -13,6 +13,7 @@ using System.Globalization;
 using System.Windows.Forms;
 using MissionPlanner.GCSViews;
 using GMap.NET.WindowsForms.Markers;
+using System.Drawing;
 
 namespace weather
 {
@@ -77,9 +78,9 @@ namespace weather
                     WeatherAPI weatherResponse = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "wind");
                     CustomMessageBox.Show(GetWindData(weatherResponse, point));
                 }
-                catch (Exception ex)
+                catch
                 {
-                    CustomMessageBox.Show(Strings.ERROR, ex.Message);
+                    CustomMessageBox.Show("Cannot Get Wind Data");
                 }
                 UpdateOverlay(_weatheroverlay);
                 UpdateOverlay(_weatheroverlayFP);
@@ -95,9 +96,9 @@ namespace weather
                     WeatherAPI weatherResponse = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "current");
                     CustomMessageBox.Show(GetCurrentData(weatherResponse, point));
                 }
-                catch (Exception ex)
+                catch
                 {
-                    CustomMessageBox.Show(Strings.ERROR, ex.Message);
+                    CustomMessageBox.Show("Cannot Get Ocean Current Data");
                 }
                 UpdateOverlay(_weatheroverlay);
                 UpdateOverlay(_weatheroverlayFP);
@@ -113,9 +114,9 @@ namespace weather
                     WeatherAPI weatherResponse = await GetWeatherData(DateTime.Now, point.Lat, point.Lng, point.Alt, "wave");
                     CustomMessageBox.Show(GetWaveData(weatherResponse, point));
                 }
-                catch (Exception ex)
+                catch
                 {
-                    CustomMessageBox.Show(Strings.ERROR, ex.Message);
+                    CustomMessageBox.Show("Cannot Get Wave Data");
                 }
                 UpdateOverlay(_weatheroverlay);
                 UpdateOverlay(_weatheroverlayFP);
@@ -140,11 +141,12 @@ namespace weather
             rootbut.DropDownItems.Add(but);
         }
 
-        private readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri("http://192.168.110.32:8189/") };
+        public static string Url = "http://192.168.110.32:8189/";
 
         private async Task<WeatherAPI> GetWeatherData(DateTimeOffset dateTime, double latitude, double longitude, double altitude, string model)
         {
-            HttpResponseMessage response = await _client.GetAsync($"/weatherapi/1.0/weather?latitude={latitude}&longitude={longitude}&altitude={altitude}&time={CreateDate(dateTime)}&model={model}");
+            HttpClient client = new HttpClient() { BaseAddress = new Uri(Url) };
+            HttpResponseMessage response = await client.GetAsync($"/weatherapi/1.0/weather?latitude={latitude}&longitude={longitude}&altitude={altitude}&time={CreateDate(dateTime)}&model={model}");
             string jsonResponse = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<WeatherAPI>(jsonResponse);
         }
@@ -153,7 +155,7 @@ namespace weather
         {
             if (data == null)
             {
-                return string.Empty;
+                return "No Wind Data";
             }
             double speed = 0;
             double direction = 0;
@@ -166,7 +168,7 @@ namespace weather
                 {
                     if (windData.ContainsKey("NULL"))
                     {
-                        return string.Empty;
+                        return "No Wind Data";
                     }
                     else
                     {
@@ -180,7 +182,7 @@ namespace weather
                         }
                         catch
                         {
-                            CustomMessageBox.Show(Strings.ERROR, "Something Went Wrong");
+                            CustomMessageBox.Show("Cannot Process Wind Data");
                         }
                     }
                 }
@@ -190,7 +192,7 @@ namespace weather
             latitude /= 4;
             longitude /= 4;
 
-            string info = $"Wind\nlatitude: {latitude} longitude: {longitude} altitdue: {altitude}\nspeed: {speed} direction: {direction}";
+            string info = $"Wind\nlatitude: {latitude} longitude: {longitude} altitdue: {altitude}m\nspeed: {speed}m/s direction: {direction}";
             point.Tag = info;
             WeatherPts.Add(point);
             return info;
@@ -200,7 +202,7 @@ namespace weather
         {
             if (data == null)
             {
-                return string.Empty;
+                return "No Ocean Current Data";
             }
             double speed = 0;
             double direction = 0;
@@ -213,7 +215,7 @@ namespace weather
                 {
                     if (windData.ContainsKey("NULL"))
                     {
-                        return string.Empty;
+                        return "No Ocean Current Data";
                     }
                     else
                     {
@@ -227,7 +229,7 @@ namespace weather
                         }
                         catch
                         {
-                            CustomMessageBox.Show(Strings.ERROR, "Something Went Wrong");
+                            CustomMessageBox.Show("Cannot Process Ocean Current Data");
                         }
                     }
                 }
@@ -237,7 +239,7 @@ namespace weather
             latitude /= 4;
             longitude /= 4;
 
-            string info = $"Ocean Current\nlatitude: {latitude} longitude: {longitude} altitdue: {altitude * -1}\nspeed: {speed} direction: {direction}";
+            string info = $"Ocean Current\nlatitude: {latitude} longitude: {longitude} altitdue: {altitude * -1}m\nspeed: {speed}m/s direction: {direction}";
             point.Tag = info;
             WeatherPts.Add(point);
             return info;
@@ -247,7 +249,7 @@ namespace weather
         {
             if (data == null)
             {
-                return string.Empty;
+                return "No Wave Data";
             }
             double height = 0;
             double direction = 0;
@@ -259,7 +261,7 @@ namespace weather
                 {
                     if (windData.ContainsKey("NULL"))
                     {
-                        return string.Empty;
+                        return "No Wave Data";
                     }
                     else
                     {
@@ -272,7 +274,7 @@ namespace weather
                         }
                         catch
                         {
-                            CustomMessageBox.Show(Strings.ERROR, "Something Went Wrong");
+                            CustomMessageBox.Show("Cannot Process Wave Data");
                         }
                     }
                 }
@@ -282,7 +284,7 @@ namespace weather
             latitude /= 4;
             longitude /= 4;
 
-            string info = $"Waves\nlatitude: {latitude} longitude: {longitude}\nheight: {height} direction: {direction}";
+            string info = $"Waves\nlatitude: {latitude} longitude: {longitude}\nheight: {height}m direction: {direction}";
             point.Tag = info;
             WeatherPts.Add(point);
             return info;
@@ -370,11 +372,13 @@ namespace weather
 
             foreach (var pnt in WeatherPts)
             {
-                weatheroverlay.Markers.Add(new GMapMarkerWeather(pnt)
+                var marker = new GMapMarkerWeather(pnt)
                 {
                     ToolTipMode = MarkerTooltipMode.OnMouseOver,
                     ToolTipText = pnt.Tag
-                });
+                };
+                marker.ToolTip.Font = new Font("Arial", 9, FontStyle.Bold);
+                weatheroverlay.Markers.Add(marker);
             }
         }
 

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using weather;
 using WebCamService;
 
 namespace MissionPlanner.GCSViews.ConfigurationView
@@ -48,6 +49,8 @@ namespace MissionPlanner.GCSViews.ConfigurationView
                 "GMapMarkerBase_InactiveDisplayStyle",
                 Maps.GMapMarkerBase.InactiveDisplayStyleEnum.Normal.ToString()
             );
+
+            txt_mpa_url.TextChanged += OnMpaUrlTextChanged;
         }
 
 
@@ -252,6 +255,8 @@ namespace MissionPlanner.GCSViews.ConfigurationView
             }
 
             startup = false;
+
+            txt_mpa_url.Text = Weather.Url;
         }
 
         private void BUT_videostart_Click(object sender, EventArgs e)
@@ -782,6 +787,11 @@ namespace MissionPlanner.GCSViews.ConfigurationView
             {
                 Settings.Instance.LogDir = path;
             }
+        }
+
+        private void OnMpaUrlTextChanged(object sender, EventArgs e)
+        {
+            Weather.Url = txt_mpa_url.Text;
         }
 
         private void CMB_theme_SelectedIndexChanged(object sender, EventArgs e)
